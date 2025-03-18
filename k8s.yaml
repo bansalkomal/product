@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+    spec:
+      containers:
+        - name: product
+          image: 474668397356.dkr.ecr.us-west-2.amazonaws.com/product-service:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://database-1.c38aeageohvq.us-west-2.rds.amazonaws.com:5432/postgres
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: Postgres123
+#          env:
+#            - name: DB_HOST
+#              value: "database-1.c38aeageohvq.us-west-2.rds.amazonaws.com"
+#            - name: DB_PORT
+#              value: "5432"
+#            - name: DB_NAME
+#              value: "postgres"
+#            - name: DB_USER
+#              value: "postgres"
+#            - name: DB_PASSWORD
+#              value: "Postgres123"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  selector:
+    app: product
